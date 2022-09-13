@@ -24,7 +24,9 @@ unsigned hash_pair_function(const S_pair &strs_pair) {
 //-------------------------------------------------------
 
 struct S_pair *pair_ctor(char *str1, char *str2) {
-
+    assert(str1);
+    assert(str2);
+    
     struct S_pair *new_pair = (struct S_pair *)calloc(1, sizeof(struct S_pair));
     assert(new_pair);
     new_pair->str_1 = str1;

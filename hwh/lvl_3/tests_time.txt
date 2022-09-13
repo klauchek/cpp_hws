@@ -1,0 +1,78 @@
+1 test:
+Num of quads: 3
+
+real	0m0,010s
+user	0m0,000s
+sys	    0m0,003s
+
+----------------
+2 test:
+Num of quads: 190
+
+real	0m0,003s
+user	0m0,003s
+sys	    0m0,000s
+
+----------------
+3 test:
+Num of quads: 300
+
+real	0m0,009s
+user	0m0,008s
+sys	    0m0,000s
+
+----------------
+4 test:
+Num of quads: 93
+
+real	0m0,204s
+user	0m0,195s
+sys 	0m0,008s
+
+----------------
+5 test:
+Num of quads: 36
+
+real	0m5,629s
+user	0m5,516s
+sys	    0m0,096s
+
+----------------
+6 test:
+Num of quads: 27999
+
+real	0m23,769s
+user	0m23,265s
+sys	    0m0,452s
+
+----------------
+7 test:
+Num of quads: 7293304
+
+real	0m51,567s
+user	0m50,670s
+sys 	0m0,819s
+
+----------------
+8 test:
+Num of quads: 2097621
+
+real	1m34,631s
+user	1m33,008s
+sys 	0m1,462s
+
+----------------
+9 test:
+Num of quads: 14021856
+
+real	1m45,208s
+user	1m43,587s
+sys	    0m1,487s
+
+----------------
+10 test:
+Num of quads: 1025359
+
+real	2m7,949s
+user	2m5,813s
+sys 	0m1,841s

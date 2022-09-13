@@ -67,6 +67,8 @@ typedef std::unordered_map<S_pair, int, my_hash> htab;
 
 
 void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
+    assert(buffer);
+    
     unsigned key = 0;
     char *word1 = NULL;
     char *word2 = NULL;
