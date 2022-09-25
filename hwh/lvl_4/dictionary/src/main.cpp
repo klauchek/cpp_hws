@@ -1,6 +1,9 @@
 #include "hashtable.hpp"
 #include <cstring>
 
+#define START_CAPACITY 128
+#define HASH_THRESHOLD 0.75
+
 struct S {
     char *str;
 };
@@ -110,7 +113,7 @@ int main () {
         abort();
     }
 
-    hashtable::Hashtable<S, int, hash_base> hashtable {8, 0.75};
+    hashtable::Hashtable<S, int, hash_base> hashtable {START_CAPACITY, HASH_THRESHOLD};
     buffer = make_buffer(buf_len);
     hashtable_fill(hashtable, buffer, buf_len);
 

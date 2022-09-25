@@ -1,7 +1,6 @@
 #ifndef __HASH_TABLE_H__
 #define __HASH_TABLE_H__
 
-#include <iostream>
 #include <vector>
 #include <cassert>
 #include <utility>
@@ -28,7 +27,7 @@ template <typename KeyT, typename T, typename HashT>
 class Hashtable {
     std::vector<Element<KeyT, T>> elements_;
     size_t size_ = 0;
-    size_t capacity_;
+    size_t capacity_;    //atterntion! it should be pow of 2 because of hashing strategy
     double threshold_;
     HashT hash_base;
 
@@ -76,7 +75,6 @@ bool Hashtable<KeyT, T, HashT>::insert(std::pair<KeyT, T> pair) {
     size_t probe_num = 0;
     while(probe_num < capacity_) {
         size_t pos = hash(elem.key, probe_num);
-        std::cout << "pos: " << pos << std::endl;
         Element<KeyT, T> &vec_elem = elements_[pos];
         if(vec_elem.type == kFull && elem.key == vec_elem.key) {
             return false;
@@ -136,17 +134,14 @@ void Hashtable<KeyT, T, HashT>::resize() {
 template <typename KeyT, typename T, typename HashT>
 bool Hashtable<KeyT, T, HashT>::erase(size_t pos) {
     if(pos >= capacity_) {
-        std::cout << "im here pos > cap" << std::endl;
         return false;
     }
 
     Element<KeyT, T> &elem = elements_[pos];
     if (elem.type == kFull) {
-        std::cout << "im here full" << std::endl;
         elem.type = kDeleted;
         return true;
     }
-    std::cout << "im here empty or deleted" << std::endl;
     return false;
 }
 

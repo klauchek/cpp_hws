@@ -1,5 +1,6 @@
 #include "strs_pair.hpp"
 #include "hashtable.hpp"
+#include <iostream>
 
 #define START_BUF_CAPACITY 128
 
@@ -111,8 +112,6 @@ void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
 unsigned quads_count(htab &hashtable) {
 
     unsigned num_of_quads = 0;
-    //итерироваться по вектору
-    //сохранять sequence - для этого счиатть хеш
     for(auto it = hashtable.begin(); it != hashtable.end(); ++it) {
         if(it->type == hashtable::kFull) {
             #ifdef PRINT_QUADS
@@ -139,34 +138,6 @@ unsigned quads_count(htab &hashtable) {
         }
     }
     return num_of_quads;
-
-    // //здесь просто идем по бакетам
-    // for(auto& bkt: hashtable) {
-
-    //     #ifdef PRINT_QUADS
-    //     size_t sz = bkt.second.size();
-    //     #else
-    //     size_t sz = bkt.second;
-    //     #endif
-
-    //     if(sz > 1) {
-    //         num_of_quads += sz * (sz - 1) / 2;
-
-    //         #ifdef PRINT_QUADS
-    //         auto cur = bkt.second.begin();
-    //         while(cur != bkt.second.end()) {
-    //             auto comp = std::next(cur);
-    //             while(comp != bkt.second.end()) {
-    //                 print_quad(*cur, *comp);
-    //                 comp = std::next(comp);
-    //             }
-    //             cur = std::next(cur);
-    //         }
-    //         #endif
-    //     }
-    // }
-    
-    // return num_of_quads;
 }
 
 //------------------------- MAIN ----------------------------//
