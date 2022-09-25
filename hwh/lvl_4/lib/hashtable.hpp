@@ -37,7 +37,10 @@ class Hashtable {
         return hash_base(key) % capacity_;
     }
     size_t hash2(const KeyT &key) const {
-        return 1 + (hash_base(key) % (capacity_ - 1));
+        size_t x = (hash_base(key) % (capacity_ - 2));
+        if (x % 2 == 0)
+            return x + 1;
+        return x; 
     }
     size_t hash(const KeyT &key, const size_t probe_num) const {   
         return (hash1(key) + probe_num * hash2(key)) % capacity_;
@@ -60,8 +63,7 @@ public:
     }
 };
 
-//в инсерте мы все время находимся в одном бакете - по одну и тому же хешу
-//result can be compared with capacity -- insert failed, not enough space
+
 template <typename KeyT, typename T, typename HashT>
 bool Hashtable<KeyT, T, HashT>::insert(std::pair<KeyT, T> pair) {
     Element<KeyT, T> elem{pair.first, pair.second, kFull};
@@ -70,12 +72,8 @@ bool Hashtable<KeyT, T, HashT>::insert(std::pair<KeyT, T> pair) {
     size_t probe_num = 0;
     while(probe_num < capacity_) {
         size_t pos = hash(elem.key, probe_num);
-        //std::cout << "pos: " << pos << std::endl;
-        //std::cout << "probe: " << probe_num << std::endl;
-
         Element<KeyT, T> &vec_elem = elements_[pos];
         if(vec_elem.type == kFull && elem.key == vec_elem.key) {
-            //std::cout << "we aready have this one " << probe_num << std::endl;
             return false;
         }
         if(vec_elem.type == kEmpty) {
@@ -107,11 +105,12 @@ template <typename KeyT, typename T, typename HashT>
 void Hashtable<KeyT, T, HashT>::resize() {
     std::vector<Element<KeyT, T>> tmp_vec(capacity_ * 2);
     size_t tmp_size = 0;
+    capacity_ *= 2;
 
     for(auto it : elements_) {
         if(it.type == kFull) {
            size_t probe_num = 0;
-           while(probe_num < capacity_ * 2) {
+           while(probe_num < capacity_) {
                 size_t pos = hash(it.key, probe_num);
                 Element<KeyT, T> &tmp_vec_elem = tmp_vec[pos];
                 if(tmp_vec_elem.type == kFull && it.key == tmp_vec_elem.key)
@@ -119,17 +118,15 @@ void Hashtable<KeyT, T, HashT>::resize() {
                 if(tmp_vec_elem.type == kEmpty) {
                     tmp_vec_elem = it;
                     ++tmp_size;
+                    break;
                 }
-                else
-                    ++probe_num;
+                ++probe_num;
            }
         }
     }
 
-    capacity_ *= 2;
     size_ = tmp_size;
     elements_.swap(tmp_vec);
-    //std::cout << "new size " << size_ << std::endl;
 }
 
 } //namespace hashtable
