@@ -61,6 +61,9 @@ public:
     VecIt<KeyT, T> end() {
         return elements_.end();
     }
+    VecIt<KeyT, T> begin() {
+        return elements_.begin();
+    }
 };
 
 
