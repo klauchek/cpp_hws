@@ -54,6 +54,7 @@ public:
     Hashtable(size_t capacity, double threshold) : capacity_(capacity), threshold_(threshold), elements_(capacity) {}
     bool insert(std::pair<KeyT, T> pair);
     VecIt<KeyT, T> find(const KeyT &key);
+    bool erase(size_t pos);
 
     size_t size() const {
         return size_;
@@ -75,6 +76,7 @@ bool Hashtable<KeyT, T, HashT>::insert(std::pair<KeyT, T> pair) {
     size_t probe_num = 0;
     while(probe_num < capacity_) {
         size_t pos = hash(elem.key, probe_num);
+        std::cout << "pos: " << pos << std::endl;
         Element<KeyT, T> &vec_elem = elements_[pos];
         if(vec_elem.type == kFull && elem.key == vec_elem.key) {
             return false;
@@ -127,9 +129,25 @@ void Hashtable<KeyT, T, HashT>::resize() {
            }
         }
     }
-
     size_ = tmp_size;
     elements_.swap(tmp_vec);
+}
+
+template <typename KeyT, typename T, typename HashT>
+bool Hashtable<KeyT, T, HashT>::erase(size_t pos) {
+    if(pos >= capacity_) {
+        std::cout << "im here pos > cap" << std::endl;
+        return false;
+    }
+
+    Element<KeyT, T> &elem = elements_[pos];
+    if (elem.type == kFull) {
+        std::cout << "im here full" << std::endl;
+        elem.type = kDeleted;
+        return true;
+    }
+    std::cout << "im here empty or deleted" << std::endl;
+    return false;
 }
 
 } //namespace hashtable
