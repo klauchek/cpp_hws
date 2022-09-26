@@ -8,7 +8,11 @@ These conditions are a convenient way to ensure that the value *h2(k)* is relati
 hash table to be searched.
 
 # C++ standard & C++ my flat map implementation comparison)
-## Compare the duration of execution
+## Compare the duration of execution 
+build with:
+```
+cmake -S ./ -B build/ -DCMAKE_BUILD_TYPE=Release
+```
 ----------------------------
 ## lvl_1-2: [dictionary](https://github.com/klauchek/cpp_hws/tree/main/hwh/lvl_4/dictionary) - not interesting to compare
 ---------------------------
