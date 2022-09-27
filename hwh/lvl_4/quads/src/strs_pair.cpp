@@ -2,11 +2,15 @@
 
 //---------- hash function adaptation ------------
 
+// If you will hide declaration of this function, specify it with static.
 unsigned hash_2sts_function(char *str_1, char *str_2) {
+    // TODO please verify function arguments.
 
     unsigned hash = 5381;
-    int c = 0;
 
+    int c = 0;
+    
+    // TODO That if str does not contain '\0'?
     while(c = *str_1++)
         hash = ((hash << 5) + hash) + c;
 
@@ -22,7 +26,7 @@ unsigned hash_pair_function(const S_pair &strs_pair) {
 }
 
 //-------------------------------------------------------
-
+// Useless memory allocation for S_pair. See main.cpp for details.
 struct S_pair *pair_ctor(char *str1, char *str2) {
     assert(str1);
     assert(str2);
@@ -46,7 +50,7 @@ int compare(const S_pair &pair_1, const S_pair &pair_2) {
 
     if(strlen(pair_1.str_1) + strlen(pair_1.str_2) != strlen(pair_2.str_1) + strlen(pair_2.str_2))
         return 0;
-
+    // TODO do it early.
     char *ptr_1 = pair_1.str_1;
     char *ptr_2 = pair_2.str_1;
 

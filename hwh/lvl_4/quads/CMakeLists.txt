@@ -22,6 +22,8 @@ set (EXEC_FILE "hwh_lvl_3")
 add_executable(${EXEC_FILE} ${SRCS})
 target_include_directories(${EXEC_FILE} PRIVATE include)
 target_include_directories(${EXEC_FILE} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/lib/${LIB})
+# Project hierarchy issue.
+# There is no need to link header-only library. Use it as include directory.
 target_link_libraries(${EXEC_FILE} PUBLIC ${LIB})
 
 if(PRINT_QUADS)

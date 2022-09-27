@@ -9,6 +9,8 @@ bool operator==(const S_pair &lhs, const S_pair &rhs) {
 }
 
 //------------------------- READING INPUT ----------------------------//
+// TODO This is not a C++ style at all. All code here is the mess between C and C++ code.
+// Try to avoid it.
 struct buffer_t {
     char *strs_arr;
     unsigned size;
@@ -24,6 +26,15 @@ void buffer_resize(struct buffer_t *buffer) {
         buffer->strs_arr[i] = 0;
 }
 
+// you do not need buffer as function argument.
+// struct buffer_t *make_buffer(unsigned num_of_strs) {
+//    struct buffer_t *buffer = calloc...;
+//    ...
+// }
+// int main () {
+//   struct buffer_t *buffer = make_buffer(smth);
+//   ...
+// }
 struct buffer_t *make_buffer(struct buffer_t *buffer, unsigned num_of_strs) {
 
     buffer = (struct buffer_t *)calloc(1, sizeof(struct buffer_t));
@@ -37,6 +48,8 @@ struct buffer_t *make_buffer(struct buffer_t *buffer, unsigned num_of_strs) {
 
     char sym = getchar();
     
+    // TODO reading from stdin by character is slow.
+    // Try to read full input stream (or part of it if it is huge) as string and parse it later.
     while((sym = getchar()) != EOF) {
     
         if(buffer->size == buffer->capacity / 2)
@@ -83,6 +96,10 @@ void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
             for (int j = 0; j < buf_len; ++j) {
                 if(isalpha(text_buffer[j])) {
                     if(i != j) {
+                        // You create small structure 16byte on heap and free it in the loop.
+                        // memory allocations in the loop hot is the worst approach. Why wont just use stack memory?
+                        // S_pair new_data {text_buffer + i, text_buffer + j};
+                        // Also S_pair is the std::pair<char*, char*>.
                         struct S_pair *new_data = pair_ctor(text_buffer + i, text_buffer + j);
 
                         #ifdef PRINT_QUADS
@@ -109,6 +126,9 @@ void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
     }
 }
 
+// TODO think it is better to specify htab as const.
+// hatb const &hastable.
+// You will encounter with certain issues I did not mansion. Try to solve it.
 unsigned quads_count(htab &hashtable) {
 
     unsigned num_of_quads = 0;
@@ -124,6 +144,13 @@ unsigned quads_count(htab &hashtable) {
                 num_of_quads += sz * (sz - 1) / 2;
 
             #ifdef PRINT_QUADS
+            // for (auto cur = it->data.begin(); cur != it->data.end(); ++cur)
+            //   for (auto comp = std::next(cur); comp != it->data.end(); ++comp)
+            //      print_quad(*cur, *comp);
+            // TIP: and if data does not change, you can rewrite it:
+            // for (auto cur = it->data.begin(), end = it->data.end(); cur != end; ++cur)
+            //   for (auto comp = std::next(cur); comp != end; ++comp)
+            //      print_quad(*cur, *comp);
             auto cur = it->data.begin();
             while(cur != it->data.end()) {
                 auto comp = std::next(cur);
@@ -152,6 +179,7 @@ int main() {
     res = scanf("%d", &strs_amount);
     if (res != 1) {
         printf("%s\n", "Wrong input of strings amount");
+        // abort is a bit of harsh. Why wont just return 1; ?
         abort();
     }
 
