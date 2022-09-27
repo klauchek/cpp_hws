@@ -135,6 +135,13 @@ unsigned quads_count(htab &hashtable) {
                 num_of_quads += sz * (sz - 1) / 2;
 
             #ifdef PRINT_QUADS
+            // for (auto cur = it->data.begin(); cur != it->data.end(); ++cur)
+            //   for (auto comp = std::next(cur); comp != it->data.end(); ++comp)
+            //      print_quad(*cur, *comp);
+            // TIP: and if data does not change, you can rewrite it:
+            // for (auto cur = it->data.begin(), end = it->data.end(); cur != end; ++cur)
+            //   for (auto comp = std::next(cur); comp != end; ++comp)
+            //      print_quad(*cur, *comp);
             auto cur = it->data.begin();
             while(cur != it->data.end()) {
                 auto comp = std::next(cur);
