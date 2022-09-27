@@ -24,6 +24,15 @@ void buffer_resize(struct buffer_t *buffer) {
         buffer->strs_arr[i] = 0;
 }
 
+// you do not need buffer as function argument.
+// struct buffer_t *make_buffer(unsigned num_of_strs) {
+//    struct buffer_t *buffer = calloc...;
+//    ...
+// }
+// int main () {
+//   struct buffer_t *buffer = make_buffer(smth);
+//   ...
+// }
 struct buffer_t *make_buffer(struct buffer_t *buffer, unsigned num_of_strs) {
 
     buffer = (struct buffer_t *)calloc(1, sizeof(struct buffer_t));
@@ -37,6 +46,8 @@ struct buffer_t *make_buffer(struct buffer_t *buffer, unsigned num_of_strs) {
 
     char sym = getchar();
     
+    // TODO reading from stdin by character is slow.
+    // Try to read full input stream (or part of it if it is huge) as string and parse it later.
     while((sym = getchar()) != EOF) {
     
         if(buffer->size == buffer->capacity / 2)
