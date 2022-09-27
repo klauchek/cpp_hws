@@ -9,6 +9,8 @@ bool operator==(const S_pair &lhs, const S_pair &rhs) {
 }
 
 //------------------------- READING INPUT ----------------------------//
+// TODO This is not a C++ style at all. All code here is the mess between C and C++ code.
+// Try to avoid it.
 struct buffer_t {
     char *strs_arr;
     unsigned size;
@@ -83,6 +85,10 @@ void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
             for (int j = 0; j < buf_len; ++j) {
                 if(isalpha(text_buffer[j])) {
                     if(i != j) {
+                        // You create small structure 16byte on heap and free it in the loop.
+                        // memory allocations in the loop hot is the worst approach. Why wont just use stack memory?
+                        // S_pair new_data {text_buffer + i, text_buffer + j};
+                        // Also S_pair is the std::pair<char*, char*>.
                         struct S_pair *new_data = pair_ctor(text_buffer + i, text_buffer + j);
 
                         #ifdef PRINT_QUADS
@@ -109,6 +115,9 @@ void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
     }
 }
 
+// TODO think it is better to specify htab as const.
+// hatb const &hastable.
+// You will encounter with certain issues I did not mansion. Try to solve it.
 unsigned quads_count(htab &hashtable) {
 
     unsigned num_of_quads = 0;
@@ -124,6 +133,7 @@ unsigned quads_count(htab &hashtable) {
                 num_of_quads += sz * (sz - 1) / 2;
 
             #ifdef PRINT_QUADS
+            // TODO for-loop?
             auto cur = it->data.begin();
             while(cur != it->data.end()) {
                 auto comp = std::next(cur);
@@ -152,6 +162,7 @@ int main() {
     res = scanf("%d", &strs_amount);
     if (res != 1) {
         printf("%s\n", "Wrong input of strings amount");
+        // abort is a bit of harsh. Why wont just return 1; ?
         abort();
     }
 
