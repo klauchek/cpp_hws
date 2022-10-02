@@ -5,7 +5,6 @@
 #include <utility>
 #include <bit>
 #include <cmath>
-#include <iostream>
 
 #define DEFAULT_THRESHOLD 0.75
 
@@ -72,6 +71,9 @@ public:
     size_t size() const {
         return size_;
     }
+    double threshold() const {
+        return threshold_;
+    }
     VecIt end() {
         return elements_.end();
     }
@@ -130,7 +132,6 @@ void Hashtable<KeyT, T>::swap(Hashtable &other) {
     std::swap(size_, other.size_);
     std::swap(capacity_, other.capacity_);
     std::swap(threshold_, other.threshold_);
-    //std::swap(hash_base, other.hash_base);
     elements_.swap(other.elements_);
 }
 

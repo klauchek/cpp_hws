@@ -6,6 +6,7 @@ project(quads)
 set(CMAKE_CXX_STANDARD 20)
 
 option(PRINT_QUADS "PRINT_QUADS" OFF)
+option(WITH_TESTS "ENABLE UNIT TESTS" OFF)
 
 set(LIB hashtable)
 set(SRCS
@@ -22,4 +23,9 @@ target_include_directories (${EXEC_FILE} PRIVATE ${CMAKE_SOURCE_DIR}/lib/${LIB})
 
 if(PRINT_QUADS)
   add_compile_definitions(PRINT_QUADS)
+endif()
+
+if (WITH_TESTS)
+    enable_testing()
+    add_subdirectory(lib)
 endif()
