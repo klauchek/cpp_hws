@@ -1,5 +1,10 @@
 #include "hashtable.hpp"
 #include <cstring>
+#include <cstdio>
+#include <cstdlib>
+#include <iostream>
+#include <cassert>
+#include <functional>
 
 #define START_CAPACITY 128
 #define HASH_THRESHOLD 0.75
@@ -19,7 +24,8 @@ std::ostream& operator<<(std::ostream& out, const S& s)
    return out << s.str;
 }
 
-struct hash_base
+template<>
+struct std::hash<S>
 {
     std::size_t operator()(const S &s) const
     {
@@ -33,7 +39,6 @@ struct hash_base
         return hash;
     }
 };
-
 
 //------------------------- READING INPUT ----------------------------//
 
@@ -56,16 +61,18 @@ char* make_buffer(unsigned buf_len) {
 }
 //------------------------- COUNTING FREQUENCY OF WORDS ----------------------------//
 
-void hashtable_fill(hashtable::Hashtable<S, int, hash_base> &hashtable, char *buf, unsigned buf_len) {
+hashtable::Hashtable<S, int> hashtable_create(char *buf, unsigned buf_len, size_t capacity, double threshold) {
     assert(buf);
+    hashtable::Hashtable<S, int> hashtable{capacity, threshold};
 
     for(int i = 0; i < buf_len; ++i)
     {
         
         if(isalpha(buf[i])) {
 
-            struct S str = { buf + i };
-            bool res = hashtable.insert(std::make_pair(str, 1));
+            S str = { buf + i };
+            hashtable::Element new_elem(std::make_pair(str, 1));
+            bool res = hashtable.insert(new_elem);
    
             if(!res) {
                 auto elem = hashtable.find(str);
@@ -74,9 +81,10 @@ void hashtable_fill(hashtable::Hashtable<S, int, hash_base> &hashtable, char *bu
             i += strlen(buf + i);
         }
     }
+    return hashtable;
 }
 
-void freq_count(hashtable::Hashtable<S, int, hash_base> &hashtable, unsigned w_buf_len) {
+void freq_count(hashtable::Hashtable<S, int> &hashtable, unsigned w_buf_len) {
 
     char *words_buf = NULL;
 
@@ -84,7 +92,7 @@ void freq_count(hashtable::Hashtable<S, int, hash_base> &hashtable, unsigned w_b
     for(int i = 0; i < w_buf_len; ++i)
     {
         if(isalpha(words_buf[i])) {
-            struct S str = { words_buf + i };
+            S str { words_buf + i };
             auto find = hashtable.find(str);
             if(find != hashtable.end())
                 printf("%d ", find->data);
@@ -110,17 +118,16 @@ int main () {
     res = scanf("%d %d", &words_amount, &buf_len);
     if (res != 2) {
         printf("%s\n", "Wrong input of words amount and text buffer lenght");
-        abort();
+        return 1;
     }
 
-    hashtable::Hashtable<S, int, hash_base> hashtable {START_CAPACITY, HASH_THRESHOLD};
     buffer = make_buffer(buf_len);
-    hashtable_fill(hashtable, buffer, buf_len);
+    hashtable::Hashtable<S, int> hashtable = hashtable_create(buffer, buf_len, START_CAPACITY, HASH_THRESHOLD);
 
     res = scanf("%d", &w_buf_len);
     if (res != 1) {
         printf("%s\n", "Wrong input of words buffer lenght");
-        abort();
+        return 1;
     }
 
     freq_count(hashtable, w_buf_len);
