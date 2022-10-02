@@ -2,7 +2,7 @@
 
 //---------- hash function adaptation ------------
 
-unsigned hash_2sts_function(char *str_1, char *str_2) {
+static unsigned hash_2sts_function(char *str_1, char *str_2) {
 
     unsigned hash = 5381;
     int c = 0;
@@ -73,7 +73,7 @@ int compare(const S_pair &pair_1, const S_pair &pair_2) {
     return 1;
 }
 
-void print_quad(S_pair &pair_1, S_pair &pair_2) {
+void print_quad(const S_pair &pair_1, const S_pair &pair_2) {
     
     printf("%s %s %s %s\n", pair_1.str_1, pair_1.str_2, pair_2.str_1, pair_2.str_2);
 }

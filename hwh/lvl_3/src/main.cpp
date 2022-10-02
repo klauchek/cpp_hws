@@ -66,9 +66,10 @@ typedef std::unordered_map<S_pair, int, my_hash> htab;
 #endif
 
 
-void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
+htab hashtable_create(struct buffer_t *buffer) {
     assert(buffer);
     
+    htab hashtable{};
     unsigned key = 0;
     char *word1 = NULL;
     char *word2 = NULL;
@@ -81,23 +82,22 @@ void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
             for (int j = 0; j < buf_len; ++j) {
                 if(isalpha(text_buffer[j])) {
                     if(i != j) {
-                        struct S_pair *new_data = pair_ctor(text_buffer + i, text_buffer + j);
+                        S_pair new_data {text_buffer + i, text_buffer + j};
 
                         #ifdef PRINT_QUADS
-                        auto res = hashtable.emplace(*new_data, std::list<S_pair>{std::initializer_list<S_pair>{*new_data}});
+                        auto res = hashtable.emplace(new_data, std::list<S_pair>{std::initializer_list<S_pair>{new_data}});
                         #else
-                        auto res = hashtable.emplace(*new_data, 1);
+                        auto res = hashtable.emplace(new_data, 1);
                         #endif
 
                         if(!res.second) {
                             #ifdef PRINT_QUADS
-                            res.first->second.push_front(*new_data);
+                            res.first->second.push_front(new_data);
                             #else
-                            auto elem = hashtable.find(*new_data);
+                            auto elem = hashtable.find(new_data);
                             ++elem->second;
                             #endif
                         }
-                        pair_dtor(new_data);
                     }
                     j += strlen(text_buffer + j);
                 }
@@ -105,9 +105,10 @@ void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
             i += strlen(text_buffer + i);
         }
     }
+    return hashtable;
 }
 
-unsigned quads_count(htab &hashtable) {
+unsigned quads_count(htab const &hashtable) {
 
     unsigned num_of_quads = 0;
     for(auto& bkt: hashtable) {
@@ -154,9 +155,7 @@ int main() {
     }
 
     buf = make_buffer(buf, strs_amount);
-    htab hashtable;
-
-    hashtable_fill(hashtable, buf);
+    htab hashtable = hashtable_create(buf);
 
     quads_num = quads_count(hashtable);
     printf("Num of quads: %u\n", quads_num);

@@ -20,7 +20,6 @@ void pair_dtor(S_pair *data);
 void print_quad(const S_pair &pair_1, const S_pair &pair_2);
 
 //---------- hash function adaptation -----------------
-unsigned hash_2sts_function(char *str_1, char *str_2);
 unsigned hash_pair_function(const S_pair &strs_pair);
 
 struct my_hash
