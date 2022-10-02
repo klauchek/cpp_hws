@@ -24,9 +24,9 @@ void buffer_resize(struct buffer_t *buffer) {
         buffer->strs_arr[i] = 0;
 }
 
-struct buffer_t *make_buffer(struct buffer_t *buffer, unsigned num_of_strs) {
+struct buffer_t *make_buffer(unsigned num_of_strs) {
 
-    buffer = (struct buffer_t *)calloc(1, sizeof(struct buffer_t));
+    struct buffer_t *buffer = (struct buffer_t *)calloc(1, sizeof(struct buffer_t));
     assert(buffer);
     buffer->capacity = START_BUF_CAPACITY;
 
@@ -62,15 +62,16 @@ void buffer_dtor(struct buffer_t *buffer) {
 //------------------------- COUNTING QUADS ----------------------------//
 
 #ifdef PRINT_QUADS
-typedef hashtable::Hashtable<S_pair, std::list<S_pair>, hash_base> htab;
+typedef hashtable::Hashtable<S_pair, std::list<S_pair>> htab;
 #else
-typedef hashtable::Hashtable<S_pair, int, hash_base> htab;
+typedef hashtable::Hashtable<S_pair, int> htab;
 #endif
 
 
-void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
+htab hashtable_create(struct buffer_t *buffer, size_t cap, double threshold) {
     assert(buffer);
     
+    htab hashtable{cap, threshold};
     unsigned key = 0;
     char *word1 = NULL;
     char *word2 = NULL;
@@ -83,23 +84,22 @@ void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
             for (int j = 0; j < buf_len; ++j) {
                 if(isalpha(text_buffer[j])) {
                     if(i != j) {
-                        struct S_pair *new_data = pair_ctor(text_buffer + i, text_buffer + j);
-
+                        S_pair new_data {text_buffer + i, text_buffer + j};
                         #ifdef PRINT_QUADS
-                        bool res = hashtable.insert(std::make_pair(*new_data, std::list<S_pair>{std::initializer_list<S_pair>{*new_data}}));
+                        hashtable::Element new_elem(std::make_pair(new_data, std::list<S_pair>{std::initializer_list<S_pair>{new_data}}));
                         #else
-                        bool res = hashtable.insert(std::make_pair(*new_data, 1));
+                        hashtable::Element new_elem(std::make_pair(new_data, 1));
                         #endif
+                        bool res = hashtable.insert(new_elem);
 
                         if(!res) {
-                            auto elem = hashtable.find(*new_data);
+                            auto elem = hashtable.find(new_data);
                             #ifdef PRINT_QUADS
-                            elem->data.push_front(*new_data);
+                            elem->data.push_front(new_data);
                             #else
                             ++elem->data;
                             #endif
                         }
-                        pair_dtor(new_data);
                     }
                     j += strlen(text_buffer + j);
                 }
@@ -107,12 +107,13 @@ void hashtable_fill(htab &hashtable, struct buffer_t *buffer) {
             i += strlen(text_buffer + i);
         }
     }
+    return hashtable;
 }
 
-unsigned quads_count(htab &hashtable) {
+unsigned quads_count(htab const &hashtable) {
 
     unsigned num_of_quads = 0;
-    for(auto it = hashtable.begin(); it != hashtable.end(); ++it) {
+    for(auto it = hashtable.cbegin(); it != hashtable.cend(); ++it) {
         if(it->type == hashtable::kFull) {
             #ifdef PRINT_QUADS
             size_t sz = it->data.size();
@@ -124,15 +125,9 @@ unsigned quads_count(htab &hashtable) {
                 num_of_quads += sz * (sz - 1) / 2;
 
             #ifdef PRINT_QUADS
-            auto cur = it->data.begin();
-            while(cur != it->data.end()) {
-                auto comp = std::next(cur);
-                while(comp != it->data.end()) {
+            for (auto cur = it->data.begin(), end = it->data.end(); cur != end; ++cur)
+                for (auto comp = std::next(cur); comp != end; ++comp)
                     print_quad(*cur, *comp);
-                    comp = std::next(comp);
-                }
-                cur = std::next(cur);
-            }
             #endif
             }
         }
@@ -152,13 +147,11 @@ int main() {
     res = scanf("%d", &strs_amount);
     if (res != 1) {
         printf("%s\n", "Wrong input of strings amount");
-        abort();
+        return 1;
     }
 
-    buf = make_buffer(buf, strs_amount);
-    htab hashtable{8, 0.75};
-
-    hashtable_fill(hashtable, buf);
+    buf = make_buffer(strs_amount);
+    htab hashtable = hashtable_create(buf, 10, 0.75);
 
     quads_num = quads_count(hashtable);
     printf("Num of quads: %u\n", quads_num);

@@ -2,8 +2,12 @@
 #define __HASH_TABLE_H__
 
 #include <vector>
-#include <cassert>
 #include <utility>
+#include <bit>
+#include <cmath>
+#include <iostream>
+
+#define DEFAULT_THRESHOLD 0.75
 
 namespace hashtable {
 
@@ -15,124 +19,141 @@ enum Ctrl {
 
 template <typename KeyT, typename T>
 struct Element {
-    KeyT key;
-    T data;
+    KeyT key{};
+    T data{};
     Ctrl type = kEmpty;
+
+    Element() {}
+    Element(std::pair<KeyT, T> pair): key(pair.first), data(pair.second), type(kFull) {}
 };
 
 template <typename KeyT, typename T>
-using VecIt = typename std::vector<Element<KeyT, T>>::iterator;
-
-template <typename KeyT, typename T, typename HashT>
 class Hashtable {
-    std::vector<Element<KeyT, T>> elements_;
+
+    using VecOfElems = typename std::vector<Element<KeyT, T>>;
+    using VecIt = typename VecOfElems::iterator;
+    using CVecIt = typename VecOfElems::const_iterator;
+
+    VecOfElems elements_;
     size_t size_ = 0;
-    size_t capacity_;    //atterntion! it should be pow of 2 because of hashing strategy
+    size_t capacity_;
     double threshold_;
-    HashT hash_base;
 
     //--------------------HASHING STRATEGY----------------------
     size_t hash1(const KeyT &key) const {
-        return hash_base(key) % capacity_;
+        return std::hash<KeyT>{}(key) & (capacity_ - 1);
     }
     size_t hash2(const KeyT &key) const {
-        size_t x = (hash_base(key) % (capacity_ - 2));
-        if (x % 2 == 0)
-            return x + 1;
-        return x; 
+        size_t x = (std::hash<KeyT>{}(key) & ((capacity_ >> 1) - 1));
+        return x | 1u;
     }
     size_t hash(const KeyT &key, const size_t probe_num) const {   
-        return (hash1(key) + probe_num * hash2(key)) % capacity_;
+        return (hash1(key) + probe_num * hash2(key)) & (capacity_ - 1);
     }
     //-----------------------------------------------------------
 
+    void swap(Hashtable &other);
     void resize();
 
 public:
 
-    Hashtable(size_t capacity, double threshold) : capacity_(capacity), threshold_(threshold), elements_(capacity) {}
-    bool insert(std::pair<KeyT, T> pair);
-    VecIt<KeyT, T> find(const KeyT &key);
+    Hashtable(size_t capacity, double threshold) {
+        capacity_ = std::popcount(capacity) == 1 ? capacity : std::pow(2, static_cast<size_t>(std::ceil(log2(capacity))));
+        threshold_ = (threshold < 1.0 && threshold > 0.0) ? threshold : DEFAULT_THRESHOLD;
+        
+        VecOfElems tmp_vec{capacity_};
+        elements_.swap(tmp_vec);
+    }
+    bool insert(Element<KeyT, T> &elem);
+    VecIt find(const KeyT &key);
     bool erase(size_t pos);
+    VecIt check_table(const KeyT &key);
 
     size_t size() const {
         return size_;
     }
-    VecIt<KeyT, T> end() {
+    VecIt end() {
         return elements_.end();
     }
-    VecIt<KeyT, T> begin() {
+    VecIt begin() {
         return elements_.begin();
+    }
+    CVecIt cend() const {
+        return elements_.cend();
+    }
+    CVecIt cbegin() const {
+        return elements_.cbegin();
     }
 };
 
-
-template <typename KeyT, typename T, typename HashT>
-bool Hashtable<KeyT, T, HashT>::insert(std::pair<KeyT, T> pair) {
-    Element<KeyT, T> elem{pair.first, pair.second, kFull};
-    if ((static_cast<double>(size_) / capacity_) >= threshold_)
-        resize();
-    size_t probe_num = 0;
-    while(probe_num < capacity_) {
-        size_t pos = hash(elem.key, probe_num);
-        Element<KeyT, T> &vec_elem = elements_[pos];
-        if(vec_elem.type == kFull && elem.key == vec_elem.key) {
-            return false;
-        }
-        if(vec_elem.type == kEmpty) {
-            vec_elem = elem;
-            ++size_;
-            return true;
-        }
-        ++probe_num;
-    }
-    return false;
-}
-
-template <typename KeyT, typename T, typename HashT>
-VecIt<KeyT, T> Hashtable<KeyT, T, HashT>::find(const KeyT &key){
-    size_t probe_num = 0;
-    while(probe_num < capacity_) {
+template <typename KeyT, typename T>
+typename Hashtable<KeyT, T>::VecIt Hashtable<KeyT, T>::check_table(const KeyT &key){
+    for(size_t probe_num = 0; probe_num < capacity_; ++probe_num) {
         size_t pos = hash(key, probe_num);
         Element<KeyT, T> &vec_elem = elements_[pos];
-        if(vec_elem.type == kFull && key == vec_elem.key)
+        if((vec_elem.type == kFull && key == vec_elem.key) || vec_elem.type == kEmpty)
             return elements_.begin() + pos;
-        if(vec_elem.type == kEmpty)
-            return elements_.end();
-        ++probe_num;
     }
     return elements_.end();
 }
 
-template <typename KeyT, typename T, typename HashT>
-void Hashtable<KeyT, T, HashT>::resize() {
-    std::vector<Element<KeyT, T>> tmp_vec(capacity_ * 2);
-    size_t tmp_size = 0;
-    capacity_ *= 2;
+template <typename KeyT, typename T>
+bool Hashtable<KeyT, T>::insert(Element<KeyT, T> &elem) {
+    if ((static_cast<double>(size_) / capacity_) >= threshold_)
+        resize();
+    auto vec_it = check_table(elem.key);
+    if(vec_it != elements_.end()) {
+        if(vec_it->type == kEmpty) {
+            *vec_it = elem;
+            ++size_;
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+
+
+template <typename KeyT, typename T>
+typename Hashtable<KeyT, T>::VecIt Hashtable<KeyT, T>::find(const KeyT &key){
+    auto vec_it = check_table(key);
+    if(vec_it != elements_.end()) {
+        if(vec_it->type == kFull)
+            return vec_it;
+        return elements_.end();
+    }
+    return elements_.end();
+}
+
+template <typename KeyT, typename T>
+void Hashtable<KeyT, T>::swap(Hashtable &other) {
+    std::swap(size_, other.size_);
+    std::swap(capacity_, other.capacity_);
+    std::swap(threshold_, other.threshold_);
+    //std::swap(hash_base, other.hash_base);
+    elements_.swap(other.elements_);
+}
+
+template <typename KeyT, typename T>
+void Hashtable<KeyT, T>::resize() {
+    Hashtable tmp_tab(capacity_ * 2, threshold_);
 
     for(auto it : elements_) {
         if(it.type == kFull) {
-           size_t probe_num = 0;
-           while(probe_num < capacity_) {
-                size_t pos = hash(it.key, probe_num);
-                Element<KeyT, T> &tmp_vec_elem = tmp_vec[pos];
-                if(tmp_vec_elem.type == kFull && it.key == tmp_vec_elem.key)
-                    break;
-                if(tmp_vec_elem.type == kEmpty) {
-                    tmp_vec_elem = it;
-                    ++tmp_size;
-                    break;
+            auto vec_it = tmp_tab.check_table(it.key);
+            if(vec_it != tmp_tab.elements_.end()) {
+                if(vec_it->type == kEmpty) {
+                    *vec_it = it;
+                    ++tmp_tab.size_;
                 }
-                ++probe_num;
-           }
+            }
         }
     }
-    size_ = tmp_size;
-    elements_.swap(tmp_vec);
+    swap(tmp_tab);
 }
 
-template <typename KeyT, typename T, typename HashT>
-bool Hashtable<KeyT, T, HashT>::erase(size_t pos) {
+template <typename KeyT, typename T>
+bool Hashtable<KeyT, T>::erase(size_t pos) {
     if(pos >= capacity_) {
         return false;
     }

@@ -2,7 +2,7 @@
 
 //---------- hash function adaptation ------------
 
-unsigned hash_2sts_function(char *str_1, char *str_2) {
+static unsigned hash_2sts_function(char *str_1, char *str_2) {
 
     unsigned hash = 5381;
     int c = 0;
