@@ -26,6 +26,7 @@ if(PRINT_QUADS)
 endif()
 
 if (WITH_TESTS)
+    message("building with google tests")
     enable_testing()
     add_subdirectory(lib)
 endif()

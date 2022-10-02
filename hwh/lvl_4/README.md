@@ -8,11 +8,36 @@ These conditions are a convenient way to ensure that the value *h2(k)* is relati
 hash table to be searched.
 
 # C++ standard & C++ my flat map implementation comparison)
-## Compare the duration of execution 
+## Compare the duration of execution
+to run task cd to `quads` or `dictionary`
+
 build with:
 ```
 cmake -S ./ -B build/ -DCMAKE_BUILD_TYPE=Release
+cd build
+make
 ```
+run task with any test:
+```
+./hwh_lvl_3 < ../tests/test_1.txt
+```
+run task with all end2end tests:
+```
+for f in ../tests/test_*.txt; do ./hwh_lvl_3 < $f; printf '\n'; done
+```
+# Unit tests (using google test)
+if you want to run with unit tests for flat map:
+```
+cmake -S ./ -B build/ -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS
+cd build
+make
+ctest
+```
+or to see full log:
+```
+ctest --verbose
+```
+
 ----------------------------
 ## lvl_1-2: [dictionary](https://github.com/klauchek/cpp_hws/tree/main/hwh/lvl_4/dictionary) - not interesting to compare
 ---------------------------
