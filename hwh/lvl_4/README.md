@@ -48,13 +48,13 @@ ctest --verbose
 | :--------:|:------------:|:-------------------:|
 | test_1    | 0m 0,003s    | 0m 0,003s           |
 | test_2    | 0m 0,010s    | 0m 0,003s           |
-| test_3    | 0m 0,014s    | 0m 0,005s           |
-| test_4    | 0m 0,151s    | 0m 0,122s           |
-| test_5    | 0m 3,488s    | 0m 3,771s           |
-| test_6    | 0m 13,893s   | 0m 16,463s          |
-| test_7    | 0m 30,474s   | 0m 37,202s          |
-| test_8    | 0m 55,703s   | 1m 08,852s          |
-| test_9    | 1m 00,786s   | 1m 15,541s          |
-| test_10   | 1m 14,973s   | 1m 34,905s          |
+| test_3    | 0m 0,013s    | 0m 0,004s           |
+| test_4    | 0m 0,134s    | 0m 0,110s           |
+| test_5    | 0m 3,427s    | 0m 3,623s           |
+| test_6    | 0m 13,821s   | 0m 15,841s          |
+| test_7    | 0m 30,293s   | 0m 35,951s          |
+| test_8    | 0m 55,621s   | 1m 07,406s          |
+| test_9    | 1m 00,931s   | 1m 13,639s          |
+| test_10   | 1m 16,032s   | 1m 32,470s          |
 
-## *Starting from the test_7 (~6,5K words), flat map wins by 18-21%*
+## *Starting from the test_7 (~6,5K words), flat map wins by 15-17%*
