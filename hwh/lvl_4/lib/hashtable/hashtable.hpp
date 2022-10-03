@@ -57,15 +57,32 @@ class Hashtable {
 public:
 
     Hashtable(size_t capacity, double threshold) {
+        // This is not that I mentioned before. Here you change silently user input.
+        // Lets imagine user wanted Hashtable(72, smth), but you actually create Hashtable(128, smth). It is unexpected.
+        // You should make user to enter value proper for you.
+        // eg. if (std::popcount(capacity) != 1) throw std::runtime_error("use power of two!").
+        // or you should inform user how you change input.
+        // Also part of calculating power of two is a bit tricky. You used slow function, but ccould actually use bit manipulation.
         capacity_ = std::popcount(capacity) == 1 ? capacity : std::pow(2, static_cast<size_t>(std::ceil(log2(capacity))));
         threshold_ = (threshold < 1.0 && threshold > 0.0) ? threshold : DEFAULT_THRESHOLD;
         
+        // That the point of this?
+        // Use elements_ = VecOfElems{capacity_};
+        // or in the constructor definition:
+        //  Hashtable(size_t capacity, double threshold) : snth... , elements{capacity_} {...}
+        // Last one is better approach.
+        
+        // But you has to be careful here. Please investigate difference between
+        //  std::vector<int> A{10} and std::vector<Element<KeyT, T>> A{10};
         VecOfElems tmp_vec{capacity_};
         elements_.swap(tmp_vec);
     }
+    // const Element<KeyT, T> &elem ??
     bool insert(Element<KeyT, T> &elem);
+    // const method ??
     VecIt find(const KeyT &key);
     bool erase(size_t pos);
+    // also const method ??
     VecIt check_table(const KeyT &key);
 
     size_t size() const {
@@ -80,9 +97,12 @@ public:
     VecIt begin() {
         return elements_.begin();
     }
+    // Just CVecIt end() const {} thanks to overloading.
+    // But you can keep cend for explicit call.
     CVecIt cend() const {
         return elements_.cend();
     }
+    // Same as cend().
     CVecIt cbegin() const {
         return elements_.cbegin();
     }
@@ -161,6 +181,7 @@ bool Hashtable<KeyT, T>::erase(size_t pos) {
 
     Element<KeyT, T> &elem = elements_[pos];
     if (elem.type == kFull) {
+        // How deleted cells are processed? What happens when all the cells are deleted?
         elem.type = kDeleted;
         return true;
     }
