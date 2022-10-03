@@ -86,6 +86,8 @@ htab hashtable_create(struct buffer_t *buffer, size_t cap, double threshold) {
                     if(i != j) {
                         S_pair new_data {text_buffer + i, text_buffer + j};
                         #ifdef PRINT_QUADS
+                        // What is the mess here? Why wont std::make_pair(new_data, std::list<S_pair>{new_data}) or smth like this.
+                        // Or move such initialization into Element constructor.
                         hashtable::Element new_elem(std::make_pair(new_data, std::list<S_pair>{std::initializer_list<S_pair>{new_data}}));
                         #else
                         hashtable::Element new_elem(std::make_pair(new_data, 1));
