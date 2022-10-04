@@ -154,7 +154,7 @@ int main() {
     }
 
     buf = make_buffer(strs_amount);
-    htab hashtable = hashtable_create(buf, 10, 2);
+    htab hashtable = hashtable_create(buf, 16, 2);
 
     quads_num = quads_count(hashtable);
     printf("Num of quads: %u\n", quads_num);
