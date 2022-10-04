@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "hashtable.hpp"
+#include <iostream>
 
 using namespace hashtable;
 
@@ -55,6 +56,39 @@ TEST(test_erase, insert_after_erase) {
     size_t counter = 0;
     for(auto it = hashtable.cbegin(); it != hashtable.cend(); ++it)
         ++counter;
-    
-    EXPECT_EQ(counter, 4);
+
+    EXPECT_EQ(counter, 2);
+    EXPECT_EQ(hashtable.size(), 2);
+}
+
+TEST(test_erase, insert_after_all_erased) {
+
+    Hashtable<int, int> hashtable{128, 0.75};
+
+    for(int i = 0; i < 100; ++i) {
+        Element elem(std::make_pair(i, i));
+        EXPECT_TRUE(hashtable.insert(elem));
+    }
+
+    for(int i = 0; i < 100; ++i)
+        EXPECT_TRUE(hashtable.erase(i));
+
+    EXPECT_EQ(hashtable.size(), 0);
+    size_t counter = 0;
+    for(auto it = hashtable.cbegin(); it != hashtable.cend(); ++it)
+        ++counter;
+
+    EXPECT_EQ(counter, 256);
+
+    //inserting after deletion
+    for(int i = 0; i < 128; ++i) {
+        Element elem(std::make_pair(i, i));
+        EXPECT_TRUE(hashtable.insert(elem));
+    }
+    EXPECT_EQ(hashtable.size(), 128);
+    counter = 0;
+    for(auto it = hashtable.cbegin(); it != hashtable.cend(); ++it)
+        ++counter;
+
+    EXPECT_EQ(counter, 256);
 }

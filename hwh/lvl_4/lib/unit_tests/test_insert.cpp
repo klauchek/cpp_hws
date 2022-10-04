@@ -13,6 +13,10 @@ bool operator==(const S &lhs, const S &rhs) {
     else return 0;
 }
 
+bool operator!=(const S &lhs, const S &rhs) {
+    return(!operator==(lhs, rhs));
+}
+
 template<>
 struct std::hash<S>
 {

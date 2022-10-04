@@ -8,6 +8,7 @@ struct S {
 };
 
 bool operator==(const S &lhs, const S &rhs);
+bool operator!=(const S &lhs, const S &rhs);
 
 template<>
 struct std::hash<S>

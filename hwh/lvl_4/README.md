@@ -28,7 +28,7 @@ for f in ../tests/test_*.txt; do ./hwh_lvl_3 < $f; printf '\n'; done
 # Unit tests (using google test)
 if you want to run with unit tests for flat map:
 ```
-cmake -S ./ -B build/ -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS
+cmake -S ./ -B build/ -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=on
 cd build
 make
 ctest

@@ -7,6 +7,9 @@
 bool operator==(const S_pair &lhs, const S_pair &rhs) {
     return compare(lhs, rhs);
 }
+bool operator!=(const S_pair &lhs, const S_pair &rhs) {
+    return (!compare(lhs, rhs));
+}
 
 //------------------------- READING INPUT ----------------------------//
 struct buffer_t {
@@ -86,7 +89,7 @@ htab hashtable_create(struct buffer_t *buffer, size_t cap, double threshold) {
                     if(i != j) {
                         S_pair new_data {text_buffer + i, text_buffer + j};
                         #ifdef PRINT_QUADS
-                        hashtable::Element new_elem(std::make_pair(new_data, std::list<S_pair>{std::initializer_list<S_pair>{new_data}}));
+                        hashtable::Element new_elem(std::make_pair(new_data, std::list<S_pair>{new_data}));
                         #else
                         hashtable::Element new_elem(std::make_pair(new_data, 1));
                         #endif
@@ -151,7 +154,7 @@ int main() {
     }
 
     buf = make_buffer(strs_amount);
-    htab hashtable = hashtable_create(buf, 10, 0.75);
+    htab hashtable = hashtable_create(buf, 10, 2);
 
     quads_num = quads_count(hashtable);
     printf("Num of quads: %u\n", quads_num);

@@ -5,6 +5,7 @@
 #include <utility>
 #include <bit>
 #include <cmath>
+#include <iostream>
 
 #define DEFAULT_THRESHOLD 0.75
 
@@ -33,9 +34,9 @@ class Hashtable {
     using VecIt = typename VecOfElems::iterator;
     using CVecIt = typename VecOfElems::const_iterator;
 
-    VecOfElems elements_;
     size_t size_ = 0;
     size_t capacity_;
+    VecOfElems elements_;
     double threshold_;
 
     //--------------------HASHING STRATEGY----------------------
@@ -53,20 +54,17 @@ class Hashtable {
 
     void swap(Hashtable &other);
     void resize();
+    size_t verify_cap(const size_t capacity) const;
+    double verify_thres(const double threshold) const;
 
 public:
 
-    Hashtable(size_t capacity, double threshold) {
-        capacity_ = std::popcount(capacity) == 1 ? capacity : std::pow(2, static_cast<size_t>(std::ceil(log2(capacity))));
-        threshold_ = (threshold < 1.0 && threshold > 0.0) ? threshold : DEFAULT_THRESHOLD;
-        
-        VecOfElems tmp_vec{capacity_};
-        elements_.swap(tmp_vec);
-    }
-    bool insert(Element<KeyT, T> &elem);
+    Hashtable(size_t capacity, double threshold) : capacity_{verify_cap(capacity)}, threshold_{verify_thres(threshold)}, elements_{capacity_} {}
+
+    VecIt not_collision_detect(const KeyT &key);
+    bool insert(const Element<KeyT, T> &elem);
     VecIt find(const KeyT &key);
-    bool erase(size_t pos);
-    VecIt check_table(const KeyT &key);
+    bool erase(const size_t pos);
 
     size_t size() const {
         return size_;
@@ -89,23 +87,25 @@ public:
 };
 
 template <typename KeyT, typename T>
-typename Hashtable<KeyT, T>::VecIt Hashtable<KeyT, T>::check_table(const KeyT &key){
+typename Hashtable<KeyT, T>::VecIt Hashtable<KeyT, T>::not_collision_detect(const KeyT &key){
     for(size_t probe_num = 0; probe_num < capacity_; ++probe_num) {
         size_t pos = hash(key, probe_num);
         Element<KeyT, T> &vec_elem = elements_[pos];
-        if((vec_elem.type == kFull && key == vec_elem.key) || vec_elem.type == kEmpty)
+        if(vec_elem.type == kFull && key != vec_elem.key)
+            continue;
+        else
             return elements_.begin() + pos;
     }
     return elements_.end();
 }
 
 template <typename KeyT, typename T>
-bool Hashtable<KeyT, T>::insert(Element<KeyT, T> &elem) {
+bool Hashtable<KeyT, T>::insert(const Element<KeyT, T> &elem) {
     if ((static_cast<double>(size_) / capacity_) >= threshold_)
         resize();
-    auto vec_it = check_table(elem.key);
+    auto vec_it = not_collision_detect(elem.key);
     if(vec_it != elements_.end()) {
-        if(vec_it->type == kEmpty) {
+        if(vec_it->type == kEmpty || vec_it->type == kDeleted) {
             *vec_it = elem;
             ++size_;
             return true;
@@ -115,16 +115,54 @@ bool Hashtable<KeyT, T>::insert(Element<KeyT, T> &elem) {
     return false;
 }
 
-
 template <typename KeyT, typename T>
 typename Hashtable<KeyT, T>::VecIt Hashtable<KeyT, T>::find(const KeyT &key){
-    auto vec_it = check_table(key);
+    auto vec_it = not_collision_detect(key);
     if(vec_it != elements_.end()) {
         if(vec_it->type == kFull)
             return vec_it;
         return elements_.end();
     }
     return elements_.end();
+}
+
+template <typename KeyT, typename T>
+bool Hashtable<KeyT, T>::erase(const size_t pos) {
+    if(pos >= capacity_) {
+        return false;
+    }
+
+    Element<KeyT, T> &elem = elements_[pos];
+    if (elem.type == kFull) {
+        elem.type = kDeleted;
+        --size_;
+        return true;
+    }
+    return false;
+}
+
+template <typename KeyT, typename T>
+double Hashtable<KeyT, T>::verify_thres(const double threshold) const{
+    if(threshold >= 1.0) {
+        std::cout << "Threshold should be < 1, the entered value was changed to the default: " << DEFAULT_THRESHOLD << std::endl;
+        return DEFAULT_THRESHOLD;
+    }
+    if(threshold <= 0.0) {
+        std::cout << "Threshold should be positive, the entered value was changed to the default: " << DEFAULT_THRESHOLD << std::endl;
+        return DEFAULT_THRESHOLD;
+    }
+    return threshold;
+}
+
+template <typename KeyT, typename T>
+size_t Hashtable<KeyT, T>::verify_cap(const size_t capacity) const{
+    if(!std::has_single_bit(capacity)) {
+        size_t new_cap = std::bit_ceil(capacity);
+        std::cout << "Capacity isn't a power of two" << std::endl;
+        std::cout << "Capacity was changed to the the smallest power of two that is not smaller than entered value: " << new_cap << std::endl;
+        return std::bit_ceil(capacity);;
+    }
+    return capacity;
 }
 
 template <typename KeyT, typename T>
@@ -141,7 +179,7 @@ void Hashtable<KeyT, T>::resize() {
 
     for(auto it : elements_) {
         if(it.type == kFull) {
-            auto vec_it = tmp_tab.check_table(it.key);
+            auto vec_it = tmp_tab.not_collision_detect(it.key);
             if(vec_it != tmp_tab.elements_.end()) {
                 if(vec_it->type == kEmpty) {
                     *vec_it = it;
@@ -153,19 +191,6 @@ void Hashtable<KeyT, T>::resize() {
     swap(tmp_tab);
 }
 
-template <typename KeyT, typename T>
-bool Hashtable<KeyT, T>::erase(size_t pos) {
-    if(pos >= capacity_) {
-        return false;
-    }
-
-    Element<KeyT, T> &elem = elements_[pos];
-    if (elem.type == kFull) {
-        elem.type = kDeleted;
-        return true;
-    }
-    return false;
-}
 
 } //namespace hashtable
 
