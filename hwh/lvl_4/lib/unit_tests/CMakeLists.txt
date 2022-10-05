@@ -24,7 +24,7 @@ set(SRCS
 set (EXEC_FILE "tests_runner")
 
 add_executable(${EXEC_FILE} ${SRCS})
-target_include_directories(${EXEC_FILE} PRIVATE ${CMAKE_SOURCE_DIR}/lib/hashtable)
+target_include_directories(${EXEC_FILE} PRIVATE ${CMAKE_SOURCE_DIR}/lib/include/hashtable)
 target_link_libraries(${EXEC_FILE} GTest::gtest_main)
 
 include(GoogleTest)
