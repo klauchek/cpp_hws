@@ -8,6 +8,8 @@ bool operator==(const S_pair &lhs, const S_pair &rhs) {
     return compare(lhs, rhs);
 }
 bool operator!=(const S_pair &lhs, const S_pair &rhs) {
+    // If you decide to rewrite main logic of operator==, you have to rewrite and operator!=.
+    // Try to reuse operator==.
     return (!compare(lhs, rhs));
 }
 
