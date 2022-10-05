@@ -17,6 +17,12 @@ set(SRCS
 set (HEADER include/strs_pair.h)
 set (EXEC_FILE "hwh_lvl_3")
 
+# add_subdirectory(lib/hashtable)
+# target_include_directories(${LIB} INTERFACE
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lib/hashtable>
+#   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>  # <prefix>/include/mylib
+# )
+
 add_executable(${EXEC_FILE} ${SRCS})
 target_include_directories(${EXEC_FILE} PRIVATE include)
 target_include_directories (${EXEC_FILE} PRIVATE ${CMAKE_SOURCE_DIR}/lib/${LIB})

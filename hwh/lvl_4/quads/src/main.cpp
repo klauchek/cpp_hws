@@ -8,7 +8,7 @@ bool operator==(const S_pair &lhs, const S_pair &rhs) {
     return compare(lhs, rhs);
 }
 bool operator!=(const S_pair &lhs, const S_pair &rhs) {
-    return (!compare(lhs, rhs));
+    return (!(lhs == rhs));
 }
 
 //------------------------- READING INPUT ----------------------------//
