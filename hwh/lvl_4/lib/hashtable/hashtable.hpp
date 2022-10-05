@@ -7,9 +7,9 @@
 #include <cmath>
 #include <iostream>
 
-#define DEFAULT_THRESHOLD 0.75
-
 namespace hashtable {
+
+const double DEFAULT_THRESHOLD = 0.75;
 
 enum Ctrl {
     kFull,           
@@ -54,6 +54,7 @@ class Hashtable {
 
     void swap(Hashtable &other);
     void resize();
+    void fill_empty(VecIt elem, Element<KeyT, T> &to_insert);
     size_t verify_cap(const size_t capacity) const;
     double verify_thres(const double threshold) const;
 
@@ -86,14 +87,13 @@ public:
     }
 };
 
+
 template <typename KeyT, typename T>
 typename Hashtable<KeyT, T>::VecIt Hashtable<KeyT, T>::not_collision_detect(const KeyT &key){
     for(size_t probe_num = 0; probe_num < capacity_; ++probe_num) {
         size_t pos = hash(key, probe_num);
         Element<KeyT, T> &vec_elem = elements_[pos];
-        if(vec_elem.type == kFull && key != vec_elem.key)
-            continue;
-        else
+        if(vec_elem.type != kFull || key == vec_elem.key)
             return elements_.begin() + pos;
     }
     return elements_.end();
@@ -104,13 +104,12 @@ bool Hashtable<KeyT, T>::insert(const Element<KeyT, T> &elem) {
     if ((static_cast<double>(size_) / capacity_) >= threshold_)
         resize();
     auto vec_it = not_collision_detect(elem.key);
-    if(vec_it != elements_.end()) {
-        if(vec_it->type == kEmpty || vec_it->type == kDeleted) {
-            *vec_it = elem;
-            ++size_;
-            return true;
-        }
+    if(vec_it == elements_.end())
         return false;
+    if(vec_it->type == kEmpty || vec_it->type == kDeleted) {
+        *vec_it = elem;
+        ++size_;
+        return true;
     }
     return false;
 }
@@ -118,11 +117,10 @@ bool Hashtable<KeyT, T>::insert(const Element<KeyT, T> &elem) {
 template <typename KeyT, typename T>
 typename Hashtable<KeyT, T>::VecIt Hashtable<KeyT, T>::find(const KeyT &key){
     auto vec_it = not_collision_detect(key);
-    if(vec_it != elements_.end()) {
-        if(vec_it->type == kFull)
-            return vec_it;
-        return elements_.end();
-    }
+    if(vec_it == elements_.end())
+        return vec_it;
+    if(vec_it->type == kFull)
+        return vec_it;
     return elements_.end();
 }
 
@@ -131,16 +129,16 @@ bool Hashtable<KeyT, T>::erase(const size_t pos) {
     if(pos >= capacity_) {
         return false;
     }
-
     Element<KeyT, T> &elem = elements_[pos];
-    if (elem.type == kFull) {
-        elem.type = kDeleted;
-        --size_;
-        return true;
-    }
-    return false;
+    if (elem.type != kFull)
+        return false;
+    elem.type = kDeleted;
+    --size_;
+    return true;
 }
 
+
+//--------------------- private methods ------------------------------
 template <typename KeyT, typename T>
 double Hashtable<KeyT, T>::verify_thres(const double threshold) const{
     if(threshold >= 1.0) {
@@ -160,7 +158,7 @@ size_t Hashtable<KeyT, T>::verify_cap(const size_t capacity) const{
         size_t new_cap = std::bit_ceil(capacity);
         std::cout << "Capacity isn't a power of two" << std::endl;
         std::cout << "Capacity was changed to the the smallest power of two that is not smaller than entered value: " << new_cap << std::endl;
-        return std::bit_ceil(capacity);;
+        return new_cap;
     }
     return capacity;
 }
@@ -174,18 +172,20 @@ void Hashtable<KeyT, T>::swap(Hashtable &other) {
 }
 
 template <typename KeyT, typename T>
+void Hashtable<KeyT, T>::fill_empty(VecIt elem, Element<KeyT, T> &to_insert) {
+    if(elem == elements_.end() || elem->type != kEmpty)
+        return;
+    *elem = to_insert;
+    ++size_;
+}
+template <typename KeyT, typename T>
 void Hashtable<KeyT, T>::resize() {
     Hashtable tmp_tab(capacity_ * 2, threshold_);
 
     for(auto it : elements_) {
         if(it.type == kFull) {
             auto vec_it = tmp_tab.not_collision_detect(it.key);
-            if(vec_it != tmp_tab.elements_.end()) {
-                if(vec_it->type == kEmpty) {
-                    *vec_it = it;
-                    ++tmp_tab.size_;
-                }
-            }
+            tmp_tab.fill_empty(vec_it, it);
         }
     }
     swap(tmp_tab);
