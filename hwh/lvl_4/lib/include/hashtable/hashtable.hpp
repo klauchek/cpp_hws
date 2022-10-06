@@ -11,7 +11,7 @@ namespace hashtable {
 
 const double DEFAULT_THRESHOLD = 0.75;
 
-enum Ctrl {
+enum class Ctrl {
     kFull,           
     kEmpty,
     kDeleted
@@ -21,10 +21,10 @@ template <typename KeyT, typename T>
 struct Element {
     KeyT key{};
     T data{};
-    Ctrl type = kEmpty;
+    Ctrl type = Ctrl::kEmpty;
 
     Element() {}
-    Element(std::pair<KeyT, T> pair): key(pair.first), data(pair.second), type(kFull) {}
+    Element(std::pair<KeyT, T> pair): key(pair.first), data(pair.second), type(Ctrl::kFull) {}
 };
 
 template <typename KeyT, typename T>
@@ -93,7 +93,7 @@ typename Hashtable<KeyT, T>::VecIt Hashtable<KeyT, T>::not_collision_detect(cons
     for(size_t probe_num = 0; probe_num < capacity_; ++probe_num) {
         size_t pos = hash(key, probe_num);
         Element<KeyT, T> &vec_elem = elements_[pos];
-        if(vec_elem.type != kFull || key == vec_elem.key)
+        if(vec_elem.type != Ctrl::kFull || key == vec_elem.key)
             return elements_.begin() + pos;
     }
     return elements_.end();
@@ -106,7 +106,7 @@ bool Hashtable<KeyT, T>::insert(const Element<KeyT, T> &elem) {
     auto vec_it = not_collision_detect(elem.key);
     if(vec_it == elements_.end())
         return false;
-    if(vec_it->type == kEmpty || vec_it->type == kDeleted) {
+    if(vec_it->type == Ctrl::kEmpty || vec_it->type == Ctrl::kDeleted) {
         *vec_it = elem;
         ++size_;
         return true;
@@ -119,7 +119,7 @@ typename Hashtable<KeyT, T>::VecIt Hashtable<KeyT, T>::find(const KeyT &key){
     auto vec_it = not_collision_detect(key);
     if(vec_it == elements_.end())
         return vec_it;
-    if(vec_it->type == kFull)
+    if(vec_it->type == Ctrl::kFull)
         return vec_it;
     return elements_.end();
 }
@@ -130,9 +130,9 @@ bool Hashtable<KeyT, T>::erase(const size_t pos) {
         return false;
     }
     Element<KeyT, T> &elem = elements_[pos];
-    if (elem.type != kFull)
+    if (elem.type != Ctrl::kFull)
         return false;
-    elem.type = kDeleted;
+    elem.type = Ctrl::kDeleted;
     --size_;
     return true;
 }
@@ -173,7 +173,7 @@ void Hashtable<KeyT, T>::swap(Hashtable &other) {
 
 template <typename KeyT, typename T>
 void Hashtable<KeyT, T>::fill_empty(VecIt elem, Element<KeyT, T> &to_insert) {
-    if(elem == elements_.end() || elem->type != kEmpty)
+    if(elem == elements_.end() || elem->type != Ctrl::kEmpty)
         return;
     *elem = to_insert;
     ++size_;
@@ -183,7 +183,7 @@ void Hashtable<KeyT, T>::resize() {
     Hashtable tmp_tab(capacity_ * 2, threshold_);
 
     for(auto it : elements_) {
-        if(it.type == kFull) {
+        if(it.type == Ctrl::kFull) {
             auto vec_it = tmp_tab.not_collision_detect(it.key);
             tmp_tab.fill_empty(vec_it, it);
         }

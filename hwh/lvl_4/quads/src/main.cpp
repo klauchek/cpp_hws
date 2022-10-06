@@ -117,7 +117,7 @@ unsigned quads_count(htab const &hashtable) {
 
     unsigned num_of_quads = 0;
     for(auto it = hashtable.cbegin(); it != hashtable.cend(); ++it) {
-        if(it->type == hashtable::kFull) {
+        if(it->type == hashtable::Ctrl::kFull) {
             #ifdef PRINT_QUADS
             size_t sz = it->data.size();
             #else
