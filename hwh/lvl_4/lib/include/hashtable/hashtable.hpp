@@ -54,9 +54,9 @@ class Hashtable {
 
     void swap(Hashtable &other);
     void resize();
-    void fill_empty(VecIt elem, Element<KeyT, T> &to_insert);
-    size_t verify_cap(const size_t capacity) const;
-    double verify_thres(const double threshold) const;
+    void fill_empty(VecIt elem, const Element<KeyT, T> &to_insert);
+    static size_t verify_cap(const size_t capacity);
+    static double verify_thres(const double threshold);
 
 public:
 
@@ -140,7 +140,7 @@ bool Hashtable<KeyT, T>::erase(const size_t pos) {
 
 //--------------------- private methods ------------------------------
 template <typename KeyT, typename T>
-double Hashtable<KeyT, T>::verify_thres(const double threshold) const{
+double Hashtable<KeyT, T>::verify_thres(const double threshold){
     if(threshold >= 1.0) {
         std::cout << "Threshold should be < 1, the entered value was changed to the default: " << DEFAULT_THRESHOLD << std::endl;
         return DEFAULT_THRESHOLD;
@@ -153,14 +153,13 @@ double Hashtable<KeyT, T>::verify_thres(const double threshold) const{
 }
 
 template <typename KeyT, typename T>
-size_t Hashtable<KeyT, T>::verify_cap(const size_t capacity) const{
-    if(!std::has_single_bit(capacity)) {
-        size_t new_cap = std::bit_ceil(capacity);
-        std::cout << "Capacity isn't a power of two" << std::endl;
-        std::cout << "Capacity was changed to the the smallest power of two that is not smaller than entered value: " << new_cap << std::endl;
-        return new_cap;
-    }
-    return capacity;
+size_t Hashtable<KeyT, T>::verify_cap(const size_t capacity){
+    if(std::has_single_bit(capacity))
+        return capacity;
+    size_t new_cap = std::bit_ceil(capacity);
+    std::cout << "Capacity isn't a power of two" << std::endl;
+    std::cout << "Capacity was changed to the the smallest power of two that is not smaller than entered value: " << new_cap << std::endl;
+    return new_cap;
 }
 
 template <typename KeyT, typename T>
@@ -172,7 +171,7 @@ void Hashtable<KeyT, T>::swap(Hashtable &other) {
 }
 
 template <typename KeyT, typename T>
-void Hashtable<KeyT, T>::fill_empty(VecIt elem, Element<KeyT, T> &to_insert) {
+void Hashtable<KeyT, T>::fill_empty(VecIt elem, const Element<KeyT, T> &to_insert) {
     if(elem == elements_.end() || elem->type != Ctrl::kEmpty)
         return;
     *elem = to_insert;
